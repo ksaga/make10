@@ -6,16 +6,12 @@ class Make10::AllCombinations < Make10::Base
   end
 
   def calc_all_combinations
-    @places_num = @nums.size - 1
-    @signs_num  = @nums.size - 1
-    place_c = sign_placing
-    signs_c = [:+, :-, :*, :/].repeated_permutation(@signs_num).to_a
-    nums_c  = @nums.permutation.to_a.uniq
-    if @verbose
-      p place_c; p place_c.size
-      p signs_c; p signs_c.size
-      p nums_c;  p nums_c.size
-    end
+    signs_num  = @nums.size - 1
+    place_c = sign_placing(@nums.size)
+    signs_c = [:+, :-, :*, :/].repeated_permutation(signs_num).to_a
+    nums_c  = @nums.permutation.to_a
+    nums_c.uniq! if @remove_redundant
+    print_params(place_c, signs_c, nums_c) if @verbose
 
     place_c.each do |l|
       signs_c.each do |s|
@@ -23,7 +19,7 @@ class Make10::AllCombinations < Make10::Base
         signs = l.dup.map{|n| ss.shift(n)}
         raise "error" unless ss.empty?
         nums_c.each do |n|
-          @count += 1
+          @trials += 1
           nums = n.dup
           fomula = nums.shift(1)
           fomula += [nums, signs].transpose.flatten
@@ -31,6 +27,7 @@ class Make10::AllCombinations < Make10::Base
           if r == @target
             found(rpn_to_s(fomula))
           else
+            # failed trial
             #output("#{rpn_to_s(fomula)} = #{r.is_a?(Numeric) ? r.to_f : r}")
           end
         end
@@ -39,12 +36,18 @@ class Make10::AllCombinations < Make10::Base
     nil
   end
 
-  def sign_placing
-    piece = Array.new(@places_num, 0)
+  def sign_placing(nums_size)
+    # if nums_size == 4
+    #   return [[1, 1, 1], [1, 0, 2], [0, 2, 1], [0, 1, 2], [0, 0, 3]]
+    # end
+    # actually the following is just for the nums_size != 4
+    places_num = nums_size - 1
+    signs_num  = nums_size - 1
+    piece = Array.new(places_num, 0)
     piece[0] = 1
-    base = @places_num.times.map{|n| piece.rotate(-n)}
+    base = places_num.times.map{|n| piece.rotate(-n)}
     pattern = base.dup  # take one
-    (@signs_num - 2).times do  # this -2 are taken above/below ones
+    (signs_num - 2).times do  # this -2 are taken above/below ones
       pattern = pattern.product(base).map do |aa,bb|
         ar = [aa,bb].transpose.map{|aaa,bbb| aaa+bbb}
         too_much = false
@@ -86,14 +89,6 @@ class Make10::AllCombinations < Make10::Base
       e = fomula.shift
       if e.is_a?(Symbol)
         aa, bb = stack.pop(2)
-        #case e
-        #when :*, :/, :-
-        #  aa = "(#{aa})" if aa =~ /[-\+]/
-        #  bb = "(#{bb})" if bb =~ /[-\+]/
-        #  e = "#{aa} #{e} #{bb}"
-        #else
-        #  e = "#{aa} #{e} #{bb}"
-        #end
         aa = "(#{aa})" if aa =~ /[-\+\*\/]/
         bb = "(#{bb})" if bb =~ /[-\+\*\/]/
         e = "#{aa} #{e} #{bb}"
@@ -102,12 +97,37 @@ class Make10::AllCombinations < Make10::Base
     end
     stack.join
   end
+
+  def print_params(place_c, signs_c, nums_c)
+    puts "Sign positions combination after numbers for reverse polish notation:"
+    print "[#{place_c.map(&:inspect).join(', ')}] "
+    p place_c.size
+    puts
+
+    puts "Signs combination for each position:"
+    puts "["
+    signs_c.each_slice(4) do |l|
+      l.each{|x| print " #{x.inspect},"}
+      puts
+    end
+    print "] "
+    p signs_c.size
+    puts
+
+    puts "Numbers combination:"
+    puts "["
+    nums_c.each_slice(4) do |l|
+      l.each{|x| print " #{x.map{|n| n.to_i}},"}
+      puts
+    end
+    print "] "
+    p nums_c.size
+
+    puts
+    puts "Results:"
+  end
 end
 
 if __FILE__ == $0
-  require 'optparse'
-  result = 10
-  opt = OptionParser.new
-  opt.on('-r', '--result=N'){|v| result = v }
-  Make10::AllCombinations.new(ARGV.shift, target: result.to_i).calc
+  Make10::AllCombinations.cmdline
 end

@@ -3,23 +3,29 @@ module Make10
     case opt[:logic]
     when :all_combinations
       require_relative 'logics/all_combinations'
-      Make10::AllCombinations.new(nums, opt).calc
+      AllCombinations.calc(nums, opt)
 
     when :recursive, nil
       require_relative 'logics/recursive'
-      Make10::Recursive.new(nums, opt).calc
+      Recursive.calc(nums, opt)
 
     end
   end
 
   def self.cmdline
     require 'optparse'
-    opt = OptionParser.new
     options = {output: STDOUT}
-    opt.on('-r', '--result=N'){|v| options[:target] = v.to_i }
-    opt.on('-v', '--verbose'){ options[:verbose] = true }
+    opt = OptionParser.new(nil, 25, '  ')
     opt.on('-l', '--logic=LOGICNAME', 'recursive (default) or all_combinations'){|v| options[:logic] = v.to_sym }
+    opt.on('-t', '--target=N', 'default: 10'){|v| options[:target] = v.to_i }
+    opt.on('-b', '--no-buffered', 'default: results is buffered and sorted'){ options[:buffered] = false }
+    opt.on('-s', '--simple', 'do simple algorithm, stop additional tuning'){ options[:remove_redundant] = false }
+    opt.on('-v', '--verbose'){ options[:verbose] = true }
     opt.getopts
+    if ARGV.size == 0
+      puts opt.help
+      exit
+    end
     self.calc(ARGV.shift, options)
   end
 end
