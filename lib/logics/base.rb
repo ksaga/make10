@@ -34,17 +34,18 @@ class Make10::Base
     raise "you have to imprement your _calc"
   end
 
-  def found(s)
-    # normalizations to remove the same result for human
+  # normalizations to remove the same result for human
+  def nomalize_formula(s)
     if @verbose
-      # to check wrong modification
       orig_s = s.dup
       r1 = eval(s.gsub(/\d/, '\&.0'))
     end
+    s = s.dup
+
     # remove unnecessary parentheses
     # ((1 * 2) * 3) + 4
-    while s =~ /([-\+\* ] |\(|^)\((\d(?: \* \d)+)\)( [-\+\* ]|\)|$)/
-      s.gsub!(/([-\+\* ] |\(|^)\((\d(?: \* \d)+)\)( [-\+\* ]|\)|$)/, '\1\2\3')
+    while s =~ /([-\+\* ] |\(|^)\((\d(?: [\*\/] \d)+)\)( [-\+\* ]|\)|$)/
+      s.gsub!(/([-\+\* ] |\(|^)\((\d(?: [\*\/] \d)+)\)( [-\+\* ]|\)|$)/, '\1\2\3')
     end
     # ((1 + 2) - 3) + 4, (1 + 2 * 3) + 4
     while s =~ /([\+ ] |\(|^)\((\d(?: [-\+\*\/] \d)+)\)( [-\+ ]|\)|$)/
@@ -52,9 +53,9 @@ class Make10::Base
     end
     # sort some elems
     # 1 * 3 * 2 * 4  ->  1 * 2 * 3 * 4
-    s.gsub!(/( |\(|^| [-\+] )(\d(?: \* \d)+)( [-\+\/] |\)|$)/){
-      a, b, c = $1, $2, $3
-      "#{a}#{b.split(/ \* /).sort.join(' * ')}#{c}"
+    s.gsub!(/(\(|^| [-\+] )(\d(?: \* \d)+)/){
+      a, b = $1, $2
+      "#{a}#{b.split(/ \* /).sort.join(' * ')}"
     }
     # 1 - 3 + 2 + 4  ->  1 + 2 + 4 - 3
     s.gsub!(/(\(|^| [-\+] )(\d(?: [-\+] \d)+)(\)|$| [-\+])/){
@@ -67,7 +68,9 @@ class Make10::Base
         "#{a}#{b.scan(/ [-\+] \d/).sort.join.sub(/^ \+ /,'')}#{c}"
       end
     }
+
     if @verbose
+      # validation
       begin
         r2 = eval(s.gsub(/\d/, '\&.0'))
         raise 'error' if r1 != r2
@@ -75,6 +78,11 @@ class Make10::Base
         raise "error: #{orig_s} = #{r1}, #{s} = #{r2}"
       end
     end
+    s
+  end
+
+  def found(s)
+    s = nomalize_formula(s)
     # check dict and show the result
     unless @found.index(s)
       output("#{s} = #{@target}")
