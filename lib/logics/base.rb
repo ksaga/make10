@@ -1,4 +1,6 @@
-class Make10Base
+module Make10; end
+
+class Make10::Base
   def initialize(nums, opt = {})
     nums = nums.each_char.to_a if nums.is_a?(String)
     @nums = nums.map{|n| n.to_r}

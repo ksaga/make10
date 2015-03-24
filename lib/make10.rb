@@ -2,12 +2,12 @@ module Make10
   def self.calc(nums, opt = {})
     case opt[:logic]
     when :all_combinations
-      require_relative 'make10_all_combinations'
-      Make10AllCombinations.new(nums, opt).calc
+      require_relative 'logics/all_combinations'
+      Make10::AllCombinations.new(nums, opt).calc
 
     when :recursive, nil
-      require_relative 'make10_recursive'
-      Make10Recursive.new(nums, opt).calc
+      require_relative 'logics/recursive'
+      Make10::Recursive.new(nums, opt).calc
 
     end
   end

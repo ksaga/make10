@@ -1,6 +1,6 @@
-require_relative 'make10_base'
+require_relative 'base'
 
-class Make10Recursive < Make10Base
+class Make10::Recursive < Make10::Base
   def _calc
     calc_recursive([], *@nums)
   end
@@ -41,5 +41,5 @@ if __FILE__ == $0
   result = 10
   opt = OptionParser.new
   opt.on('-r', '--result=N'){|v| result = v }
-  Make10Recursive.new(ARGV.shift, target: result.to_i).calc
+  Make10::Recursive.new(ARGV.shift, target: result.to_i).calc
 end
