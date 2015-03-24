@@ -19,7 +19,7 @@ class Make10App < Sinatra::Base
     numbers = params[:numbers].to_s.strip
     case
     when numbers =~ /\A\d+\z/
-      r = Make10.new(numbers, output: nil).calc
+      r = Make10.calc(numbers)
       "#{r.sort.join("<br>\n")}<br>\n"
     when (not params[:numbers] and settings.environment == :development)
       erb :index
