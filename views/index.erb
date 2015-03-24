@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Make 10 解答検索ツール</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--[if lt IE 9]>
+<script type="text/javascript" src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script>
+function getXMLHttpRequest(){
+  if(window.ActiveXObject){ //IE
+    try {
+      return new ActiveXObject("Msxml2.XMLHTTP"); //MSXML2 and later
+    } catch (e) {
+      try {
+        return new ActiveXObject("Microsoft.XMLHTTP"); //MSXML
+      } catch (e2) {
+        return null;
+      }
+   }
+  } else if(window.XMLHttpRequest){
+    return new XMLHttpRequest();
+  } else {
+    return null;
+  }
+}
+
+function readSnnipetAsync(url, target)
+{
+  var xhr = getXMLHttpRequest();
+  xhr.open("GET", url, true);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      var telm = document.getElementById(target);
+      telm.innerHTML = xhr.responseText;
+    }
+  }
+  xhr.send(null);
+}
+
+function fkeydown(){
+  if(window.event.keyCode==13){ // on Enter key
+    resolver_execute();
+  }
+}
+
+function resolver_execute(){
+  var val = document.querySelector('#numbers').value;
+  if(val && val != ''){
+    readSnnipetAsync(val,'results');
+  }
+}
+</script>
+<style type="text/css">
+#resolver-box {
+  min-height: 100px;
+  margin-bottom: 1.5em;
+}
+#results {
+  font-family: monospace;
+  margin: 10px;
+}
+span.mono {
+  font-family: monospace;
+}
+</style>
+</head>
+<body>
+  <h1 id="site-title">Make 10 解答検索ツール</h1>
+  <div id="resolver-box">
+    <input type="text" name="numbers" id="numbers" placeholder="4桁の数字を入力" onkeydown="fkeydown()">
+    <button id="execute" onclick="resolver_execute()">実行</button>
+    <div>補足：「×（掛ける）」は「<span class="mono">*</span>」、「÷（割る）」は「<span class="mono">/</span>」と表示されます。</div>
+    <div id="results"></div>
+  </div>
+</body>
+</html>
