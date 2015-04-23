@@ -65,10 +65,8 @@ class Make10::AllCombinations < Make10::Base
 
   # reverse polish notation calc
   def rpn_calc(fomula)
-    fomula = fomula.dup
     stack = []
-    while 0 < fomula.size
-      e = fomula.shift
+    fomula.each do |e|
       if e.is_a?(Symbol)
         aa, bb = stack.pop(2)
         e = aa.send(e, bb)
@@ -85,8 +83,7 @@ class Make10::AllCombinations < Make10::Base
   def rpn_to_s(fomula)
     fomula = fomula.map{|e| Numeric === e ? e.to_i : e}
     stack = []
-    while 0 < fomula.size
-      e = fomula.shift
+    fomula.each do |e|
       if e.is_a?(Symbol)
         aa, bb = stack.pop(2)
         aa = "(#{aa})" if aa =~ /[-\+\*\/]/

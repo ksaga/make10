@@ -1,6 +1,8 @@
 require 'test/unit'
 require_relative '../lib/logics/base'
+require_relative '../lib/logics/all_combinations'
 require_relative '../lib/logics/recursive'
+require_relative '../lib/logics/min_combinations'
 
 class TestSample < Test::Unit::TestCase
   def test_nomalize_formula_dont_break_results
@@ -30,8 +32,49 @@ class TestSample < Test::Unit::TestCase
     end
   end
 
-  def test_all_results
-    ans = %w(
+  def test_all_combinations_results
+    res = []
+    # not all, this is too slow
+    (0..99).each do |num|
+      n = ("%04d" % num).each_char.to_a
+      next unless n == n.sort
+      r = Make10::AllCombinations.calc(n)
+      res << n.join if 1 < r.size
+    end
+
+    ans = %w(0019 0025 0028 0037 0046 0055)
+    assert_equal(ans.size, res.size)
+    assert_equal(ans, res)
+  end
+
+  def test_recursive_all_results
+    res = []
+    (0..9999).each do |num|
+      n = ("%04d" % num).each_char.to_a
+      next unless n == n.sort
+      r = Make10::Recursive.calc(n)
+      res << n.join if 1 < r.size
+    end
+
+    assert_equal(552, res.size)
+    assert_equal(all_ans, res)
+  end
+
+  def test_min_combinations_all_results
+    res = []
+    (0..9999).each do |num|
+      n = ("%04d" % num).each_char.to_a
+      next unless n == n.sort
+      r = Make10::MinCombinations.calc(n)
+      res << n.join if 1 < r.size
+    end
+
+    assert_equal(552, res.size)
+    assert_equal(all_ans, res)
+  end
+
+  def all_ans
+    %w(
 0019 0025 0028 0037 0046 0055 0115 0118 0119 0124 0125 0126 0127 0128 0129
 0133 0135 0136 0137 0138 0139 0145 0146 0147 0149 0155 0156 0159 0169 0179
 0189 0199 0223 0224 0225 0226 0227 0228 0229 0234 0235 0237 0238 0239 0244
@@ -70,16 +113,5 @@ class TestSample < Test::Unit::TestCase
 5777 5778 5779 5789 5888 5889 5999 6668 6669 6678 6679 6688 6689 6699 6779
 6788 6789 6799 6889 7778 7779 7889 7899 8888 8889 8999 9999
     )
-
-    res = []
-    (0..9999).each do |num|
-      n = ("%04d" % num).each_char.to_a
-      next unless n == n.sort
-      r = Make10::Recursive.calc(n)
-      res << n.join if 1 < r.size
-    end
-
-    assert_equal(res.size, 552)
-    assert_equal(res, ans)
   end
 end
