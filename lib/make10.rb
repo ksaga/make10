@@ -5,9 +5,13 @@ module Make10
       require_relative 'logics/all_combinations'
       AllCombinations.calc(nums, opt)
 
-    when :recursive, nil
+    when :recursive
       require_relative 'logics/recursive'
       Recursive.calc(nums, opt)
+
+    when :min_combinations, nil
+      require_relative 'logics/min_combinations'
+      MinCombinations.calc(nums, opt)
 
     end
   end
